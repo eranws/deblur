@@ -1,53 +1,35 @@
 img = imread('Beautiful-Green-Nature-With-Birds-Blue-Jay-Bird.jpg');
 img = im2double(rgb2gray(img));
 
-blur_angle = 2;
+blur_angle = 1;
 
 %interp = 'bilinear';
 interp = 'bicubic';
 
+%% create synthetic blurred image
+% todo: synth blur kernel
 r = imrotate(img, blur_angle, interp, 'crop');
+s = (img + r) / 2; 
 
-s = (img + r) / 2; %todo: synth blur kernel
-
+%% derivate by subtracting slightly rotated image
 sz = max(size(img));
-dth = atand(2/sz); % creates 1 pixel difference at the farmost pixel
+dth = atand(1/sz); % creates 1 pixel difference at the farmost pixel
 sdth = s - imrotate(s, dth, interp, 'crop');
 
-deriv_order = 1;
-dy = diff(s, deriv_order, 1);
-dx = diff(s, deriv_order, 2);
+figure(1);
+imagesc(sdth);
 
-%imagesc(r-img);
-
-
-theta = -4:0.05:4;
-%-0.3:0.05:0.3;
+%% compare similarity with rotated copies of the derivative
+theta = -3:0.1:3;
 th_sz = length(theta);
+p = zeros(th_sz, 2);
 
-p = zeros(1, th_sz);
+coeff = dot(sdth(:), sdth(:));
 for i = 1:th_sz
     si = imrotate(sdth, theta(i), interp, 'crop');
-%{
-    xc = xcorr2(si,s);
-    figure;
-    imagesc(xc);
-    colorbar;
-    title(['theta' num2str(i)]);
-    c = int16(size(xc)/2); %center pixel
-    score = xc(c(1), c(2));
-%}
-
-    %dyi = diff(si, deriv_order, 1);
-    %dxi = diff(si, deriv_order, 2);
-    %score = norm(dyi-dy) + norm(dxi-dx);
-    score = norm(si-sdth);
-    
-    p(i) = score;
-    
+    score = dot(si(:), sdth(:));
+    p(i,:) = score / coeff;
 end
 
-figure;
+figure(2);
 plot(theta, p);
-
-
