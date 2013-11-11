@@ -13,10 +13,14 @@ s = (img + r) / 2;
 
 %% derivate by subtracting slightly rotated image
 sz = max(size(img));
+
 dth = atand(2/sz); % creates 1 pixel difference at the farmost pixel
-sdth = +s - imrotate(s, dth, interp, 'crop') - 5 * imrotate(s, dth/5, interp, 'crop') + 5 * imrotate(s, dth * 4/5, interp, 'crop') - 10 * imrotate(s, dth * 3/5, interp, 'crop') + 10 * imrotate(s, dth * 2/5, interp, 'crop');
-
-
+sdth = s;
+N = 3;
+for i = 1:N
+ sdth = sdth + (-1)^i * nchoosek(N,i) * imrotate(s, dth * i/N, interp, 'crop');
+end
+sdth = sdth / (2 ^ N);
 
 %% compare similarity with rotated copies of the derivative
 % use gradient descent?
