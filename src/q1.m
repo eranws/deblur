@@ -1,7 +1,13 @@
 img = imread('Beautiful-Green-Nature-With-Birds-Blue-Jay-Bird - copy.jpg');
 img = im2double(rgb2gray(img));
 
+%img = imresize(img, 0.5);
+%img = ones(size(img));
+
 blur_angle = 0.5;
+
+sm = size(img) * tand(blur_angle); %safe_margins
+sm = ceil(sm) + 2; % +2 to be extra safe...
 
 %interp = 'bilinear';
 interp = 'bicubic';
@@ -28,10 +34,13 @@ theta = -1:0.02:1;
 th_sz = length(theta);
 p = zeros(th_sz, 2);
 
-coeff = dot(sdth(:), sdth(:));
+sdth_sm = sdth(sm(1):end-sm(1), sm(2):end-sm(2)); 
+coeff = dot(sdth_sm(:), sdth_sm(:));
 for i = 1:th_sz
     si = imrotate(sdth, theta(i), interp, 'crop');
-    score = dot(si(:), sdth(:));
+    %score = dot(si(:), sdth(:));
+    si_sm = si(sm(1):end-sm(1), sm(2):end-sm(2)); 
+    score = dot(si_sm(:), sdth_sm(:));
     p(i,:) = score / coeff;
 end
 
